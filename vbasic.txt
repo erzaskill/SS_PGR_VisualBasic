@@ -1,0 +1,144 @@
+' Načítání hodnot do listu.
+' Program bude načítat číselné hodnoty, pokud načte nečíselnou, pak ji ignoruje.
+' Kladné hodnoty vloží do sloupce A, záporné do sloupce B a nulové do C
+' Poté se zeptá zda má načítání ukončit
+' Po ukončení načítání zobrazí v MsgBoxu počty kladných, záprných a nulových hodnot
+Sub nacteniDoListu()
+Dim a As Variant, pZap As Long, pKlad As Long, pNul As Long
+Dim v As String
+Cells.Clear
+Do
+    Do
+        a = InputBox("číslo?")
+        If IsNumeric(a) Then Exit Do
+        MsgBox "Zadej číselnou hodnotu"
+    Loop
+    
+    If a > 0 Then
+        pKlad = pKlad + 1
+    Cells(pKlad, 1) = a
+    
+    ElseIf a < 0 Then
+        pZap = pZap + 1
+      Cells(pZap, 2) = a
+      
+    Else
+        pNul = pNul + 1
+      Cells(pNul, 3) = a
+    End If
+Loop Until MsgBox("Konec?", vbYesNo) = vbYes
+v = "Kladné: " & pKlad & vbCrLf
+v = v & "Záporné: " & pZap & vbCrLf
+v = v & "Nula: " & pNul
+MsgBox v, , "Výskyt hodnot"
+End Sub
+
+'Program pracuje s výběrem buněk na listu
+'Hodnoty všech  buněk z výběru spojí do textového řetězce, budou odděleny "; "
+'Řetězec zobrazí v MsgBoxu
+
+Sub spojeniDoRetezce()
+Dim bunka As Range, v As String
+For Each bunka In Selection
+    If bunka.Value <> "" Then v = v & bunka.Value & "; "
+Next bunka
+
+MsgBox v
+End Sub
+
+
+
+'Program pracuje s výběrem buněk na listu
+'Minimální a maximální hodnoty budou červenou barvou.
+
+Sub SelectionMinMaxCervene()
+Dim r As Long
+Dim min As Double, max As Double
+Dim v As String
+
+min = Application.WorksheetFunction.min(Selection)
+max = Application.WorksheetFunction.max(Selection)
+
+
+For r = 1 To Selection.Cells.Count
+    If Selection.Cells(r) = min Or Selection.Cells(r) = max Then
+       Selection.Cells(r).Font.ColorIndex = 3
+    End If
+Next r
+
+
+End Sub
+
+'Program pracuje se sloupcem dat na prvnim listu
+'Data začínají od A1 po poslední neprázdnou buňku
+'Program všechny nečíselné hodnoty přesune na list Data, do prvního sloupce od A1
+'V původním sloupci číselné hodnoty přesune tak, aby mezi nima nebyly prázdné buňky
+'V MsgBoxu zobrazímaximální hodnotu
+Sub textKopirovani()
+Dim i As Long, iData As Long, iPole As Long
+Dim pole() As Double
+
+i = 1
+Do Until Cells(i, 1).Value = ""
+  'IsNumeric()testuje zda lze textový řetězec převést na číslo
+    
+    If IsNumeric(Worksheets(1).Cells(i, 1)) = False Then
+        iData = iData + 1
+        Worksheets("Data").Cells(iData, 1) = Worksheets(1).Cells(i, 1)
+        
+    Else
+        iPole = iPole + 1
+        ReDim Preserve pole(1 To iPole)
+        pole(iPole) = Worksheets(1).Cells(i, 1)
+    End If
+    Worksheets(1).Cells(i, 1) = ""
+    i = i + 1
+Loop
+For i = 1 To iPole
+    Worksheets(1).Cells(i, 1) = pole(i)
+Next i
+
+MsgBox Application.WorksheetFunction.max(pole), , "Maximální hodnota"
+End Sub
+
+'Program pracuje s výběrem buněk na listu
+'Program do prvního řádku vloží hodnoty z druhého
+'a do druhého vloží hodnoty z prvního řádku.
+
+Sub vymenaRadku()
+
+Dim pole() As Variant
+Dim i As Long, i2 As Long
+i = 1
+'Uložení hodnot prvního řádku do pole
+Do Until Selection.Cells(1, i) = ""
+  ReDim Preserve pole(1 To i)
+  pole(i) = Selection.Cells(1, i)
+  i = i + 1
+Loop
+
+For i2 = 1 To i - 1
+'Do prvního řádku se vloží hodnoty z druhého
+    Selection.Cells(1, i2) = Selection.Cells(2, i2)
+'Do druhého řádku se vloží hodnoty z pole
+    Selection.Cells(2, i2) = pole(i2)
+Next i2
+
+End Sub
+
+'Prgram pracuje s s výběrem buněk na listu
+'Program hledá buňku se žlutou výplní 'Range("A1").Interior.Color = 65535
+'Pokud najde, pak data zkopiruje na list Data od A1, do sloupce
+ 
+Sub selectionZlutaBarva()
+Dim i As Long, iData As Long
+
+For i = 1 To Selection.Count
+
+    If Selection.Cells(i).Interior.Color = 65535 Then
+        iData = iData + 1
+        Worksheets("Data").Cells(iData, 1) = Selection.Cells(i)
+    End If
+Next i
+
+End Sub
